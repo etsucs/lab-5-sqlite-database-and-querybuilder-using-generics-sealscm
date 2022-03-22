@@ -12,8 +12,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Lab_5.Models;
 
 namespace Lab_5
 {
@@ -21,6 +23,13 @@ namespace Lab_5
     {
         static void Main(string[] args)
         {
+            PropertyInfo[] property = typeof(Author).GetProperties();
+
+            foreach (PropertyInfo propertyInfo in property)
+            {
+                Console.WriteLine(propertyInfo.Name);
+            }
+
 
         }
     }

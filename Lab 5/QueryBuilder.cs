@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
@@ -78,7 +79,35 @@ namespace Lab_5
 
         public void Create<T> (T obj)
         {
+            //Get objects property names
+            PropertyInfo[] properties = typeof(T).GetProperties();
 
+            //Get values from properties
+            List<string> values = new List<string>();
+            foreach (PropertyInfo property in properties)
+            {
+                values.Add(property.GetValue(obj).ToString());
+            }
+
+            //Formatting string to make it correct for sql statement
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < values.Count; i++)
+            {
+                if(i == values.Count - 1)
+                {
+                    sb.Append($"{values[i]}");
+                }
+                else
+                {
+                    sb.Append($"{values[i]}, ");
+                }
+            }
+
+            var command = connection.CreateCommand();
+
+            command.CommandText = $"insert into {typeof(T).Name} values ({sb})";
+
+            var reader = command.ExecuteNonQuery();
         }
 
         public void Update<T> (T obj)
