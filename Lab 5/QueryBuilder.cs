@@ -24,17 +24,56 @@ namespace Lab_5
 
         public QueryBuilder (string locationOfDatabase)
         {
-
+            connection = new SqliteConnection (locationOfDatabase);
+            connection.Open();
         }
 
         public T Read<T> (int id) where T : new()
         {
-            return new T ();
-        }
+            var command = connection.CreateCommand();
 
-        public List<T> ReadAll<T> ()
+            command.CommandText = $"select * from {typeof(T).Name} where Id = {id}";
+
+            var reader = command.ExecuteReader();
+
+            T data = new T();
+
+            while (reader.Read())
+            {
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    typeof(T).GetProperty(reader.GetName(i)).SetValue(data, reader.GetValue(i));
+                }
+            }
+
+            return data;
+        }
+        
+        public List<T> ReadAll<T> () where T : new()
         {
-            return new List<T> ();
+            var command = connection.CreateCommand();
+
+            command.CommandText = $"select * from {typeof(T).Name}";
+
+            var reader = command.ExecuteReader();
+
+            T data;
+
+            var datas = new List<T>();
+
+            while (reader.Read())
+            {
+                data = new T();
+
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    typeof(T).GetProperty(reader.GetName(i)).SetValue(data, reader.GetValue(i));
+                }
+
+                datas.Add(data);
+            }
+
+            return datas;
         }
 
         public void Create<T> (T obj)
@@ -54,7 +93,7 @@ namespace Lab_5
 
         public void Dispose()
         {
-
+            connection.Dispose();
         }
     }
 }

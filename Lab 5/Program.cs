@@ -15,7 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lab5
+namespace Lab_5
 {
     public class Program
     {
