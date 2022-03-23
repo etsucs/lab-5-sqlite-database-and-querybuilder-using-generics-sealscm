@@ -27,74 +27,69 @@ namespace Lab_5
             string path = FileRoot.GetDefaultDirectory();
             string fullPath = path + $"{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Library.db";
 
-            QueryBuilder qb = new QueryBuilder(fullPath);
-
-            //Single read command example
-            Author me = qb.Read<Author>(1);
-            Console.WriteLine("Single Read command\n" + me + "\n\n");
-
-
-
-            //Read all command example
-            List<Author> Authors = qb.ReadAll<Author>();
-            Console.WriteLine("Read All command");
-            foreach (var item in Authors)
+            using (QueryBuilder qb = new QueryBuilder(fullPath))
             {
-                Console.WriteLine(item);
+                //Single read command example
+                Author author = qb.Read<Author>(1);
+                Console.WriteLine("Single Read command\n" + author + "\n\n");
+
+
+
+                //Read all command example
+                List<Author> authors = qb.ReadAll<Author>();
+                Console.WriteLine("Read All command");
+                foreach (var item in authors)
+                {
+                    Console.WriteLine(item);
+                }
+                Console.WriteLine("\n");
+
+
+
+                //Create command example
+                Author newAuthor = new Author();
+                newAuthor.Id = 4;
+                newAuthor.FirstName = "John";
+                newAuthor.Surname = "Belemy";
+
+                qb.Create<Author>(newAuthor);
+
+                authors = qb.ReadAll<Author>();
+                Console.WriteLine("Create command:");
+                foreach (var item in authors)
+                {
+                    Console.WriteLine(item);
+                }
+                Console.WriteLine("\n");
+
+
+
+                //Update command example
+                newAuthor.Surname = "Larry";
+                qb.Update<Author>(newAuthor);
+
+                authors = qb.ReadAll<Author>();
+
+                Console.WriteLine("Update command:");
+                foreach (var item in authors)
+                {
+                    Console.WriteLine(item);
+                }
+                Console.WriteLine("\n");
+
+
+
+                //Delete command example
+                qb.Delete<Author>(newAuthor);
+
+                authors = qb.ReadAll<Author>();
+
+                Console.WriteLine("Delete command:");
+                foreach (var item in authors)
+                {
+                    Console.WriteLine(item);
+                }
             }
-            Console.WriteLine("\n");
-
-
-
-            //Create command example
-            Author newA = new Author();
-            newA.Id = 4;
-            newA.FirstName = "John";
-            newA.Surname = "Belemy";
-            
-            qb.Create<Author>(newA);
-
-            Authors = qb.ReadAll<Author>();
-            Console.WriteLine("Create command:");
-            foreach (var item in Authors)
-            {
-                Console.WriteLine(item);
-            }
-            Console.WriteLine("\n");
-
-
-
-            //Update command example
-            newA.Surname = "Larry";
-            qb.Update<Author>(newA);
-
-            Authors = qb.ReadAll<Author>();
-
-            Console.WriteLine("Update command:");
-            foreach (var item in Authors)
-            {
-                Console.WriteLine(item);
-            }
-            Console.WriteLine("\n");
-
-
-
-            //Delete command example
-            qb.Delete<Author>(newA);
-
-            Authors = qb.ReadAll<Author>();
-
-            Console.WriteLine("Delete command:");
-            foreach (var item in Authors)
-            {
-                Console.WriteLine(item);
-            }
-            Console.WriteLine("\n");
-
-
-
-            //Dispose of resources for QueryBuilder object
-            qb.Dispose();
         }
     }
 }

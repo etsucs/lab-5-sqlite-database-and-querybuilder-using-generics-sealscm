@@ -48,7 +48,7 @@ namespace Lab_5
             {;
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    //verify if data type is int, then convert to int, because sqlite's default integer is 64 based
+                    //verify if data type is int, then convert to int, because sqlite's default integer converts to int64
                     if (typeof(T).GetProperty(reader.GetName(i)).PropertyType == typeof(int))
                     {
                         typeof(T).GetProperty(reader.GetName(i)).SetValue(data, Convert.ToInt32(reader.GetValue(i)));
@@ -187,6 +187,7 @@ namespace Lab_5
 
         /*
          * Updates a record by taking a parametered object and taking the values of its properties.
+         * Note: It is assumed that the first property is the PK of the object.
          */
         public void Update<T> (T obj)
         {
@@ -236,7 +237,7 @@ namespace Lab_5
 
         /*
          * Delete command to delete the parametered object from the database.
-         * It is assumed that the first property of an object will be its PK,
+         * Note: It is assumed that the first property of an object will be its PK,
          * so that first property will be used on deletion.
          */
         public void Delete<T> (T obj)
@@ -262,7 +263,6 @@ namespace Lab_5
          */
         public void Dispose()
         {
-            connection.Close();
             connection.Dispose();
         }
     }
