@@ -4,7 +4,7 @@
  * Project Name: Lab 5
  * ==========================================================================================
  * Creator's Name and Email: Chris Seals, sealscm@etsu.edu
- * Date Created: Mar-21-2022
+ * Date Created: Mar-23-2022
  * Course: CSCI-2910-001
  * ==========================================================================================
  */
@@ -29,6 +29,11 @@ namespace Lab_5
             connection.Open();
         }
 
+        /*
+         * Read command to select a single record by a given Id number from the parameter.
+         * Note: For datatypes of type DateTime, the stored value in the SQLite DB must be in YYYY-MM-DD format.
+         * If it is not, then a default null value will be assigned upon object creation.
+         */
         public T Read<T> (int id) where T : new()
         {
             var command = connection.CreateCommand();
@@ -40,13 +45,16 @@ namespace Lab_5
             T data = new T();
 
             while (reader.Read())
-            {
+            {;
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
+                    //verify if data type is int, then convert to int, because sqlite's default integer is 64 based
                     if (typeof(T).GetProperty(reader.GetName(i)).PropertyType == typeof(int))
                     {
                         typeof(T).GetProperty(reader.GetName(i)).SetValue(data, Convert.ToInt32(reader.GetValue(i)));
                     }
+
+                    //verify if data type is DateTime, then make sure it is in the correct format
                     else if (typeof(T).GetProperty(reader.GetName(i)).PropertyType == typeof(DateTime) && reader.GetValue(i).ToString().Split('-').Length == 3)
                     {
                         string[] date = reader.GetValue(i).ToString().Split('-');
@@ -58,6 +66,8 @@ namespace Lab_5
                         var dateTime = new DateTime(dateNum[0], dateNum[1], dateNum[2]);
                         typeof(T).GetProperty(reader.GetName(i)).SetValue(data, dateTime);
                     }
+
+                    //other data types will be set here
                     else
                     {
                         typeof(T).GetProperty(reader.GetName(i)).SetValue(data, reader.GetValue(i));
@@ -66,7 +76,12 @@ namespace Lab_5
             }
             return data;
         }
-        
+
+        /*
+         * ReadAll command to select all records from a table in the Sqlite DB.
+         * Note: For datatypes of type DateTime, the stored value in the SQLite DB must be in YYYY-MM-DD format.
+         * If it is not, then a default null value will be assigned upon object creation.
+         */
         public List<T> ReadAll<T> () where T : new()
         {
             var command = connection.CreateCommand();
@@ -85,10 +100,13 @@ namespace Lab_5
 
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
+                    //verify if data type is int, then convert to int, because sqlite's default integer is 64 based
                     if (typeof(T).GetProperty(reader.GetName(i)).PropertyType == typeof(int))
                     {
                         typeof(T).GetProperty(reader.GetName(i)).SetValue(data, Convert.ToInt32(reader.GetValue(i)));
                     }
+
+                    //verify if data type is DateTime, then make sure it is in the correct format
                     else if (typeof(T).GetProperty(reader.GetName(i)).PropertyType == typeof(DateTime) && reader.GetValue(i).ToString().Split('-').Length == 3)
                     {
                         string[] date = reader.GetValue(i).ToString().Split('-');
@@ -100,6 +118,8 @@ namespace Lab_5
                         var dateTime = new DateTime(dateNum[0], dateNum[1], dateNum[2]);
                         typeof(T).GetProperty(reader.GetName(i)).SetValue(data, dateTime);
                     }
+
+                    //other data types will be set here
                     else
                     {
                         typeof(T).GetProperty(reader.GetName(i)).SetValue(data, reader.GetValue(i));
@@ -111,6 +131,12 @@ namespace Lab_5
             return datas;
         }
 
+
+        /*
+         * Creates an object to insert into the Sqlite DB.
+         * Note: Must match PK constraint of Id, so it must be unique to the DB upon insertion,
+         * and any foreign keys must also be correctly referenced if included.
+         */
         public void Create<T> (T obj)
         {
             //Get objects property names
@@ -120,14 +146,17 @@ namespace Lab_5
             List<string> values = new List<string>();
             foreach (PropertyInfo property in properties)
             {
+                //format DateTime for DB
                 if (property.PropertyType == typeof(DateTime))
                 {
                     values.Add("\"" + ((DateTime)property.GetValue(obj)).Year + "-" + ((DateTime)property.GetValue(obj)).Month + "-" + ((DateTime)property.GetValue(obj)).Day + "\"");
                 }
+                //format string for DB
                 else if (property.PropertyType == typeof(string))
                 {
                     values.Add("\"" + property.GetValue(obj).ToString() + "\"");
                 }
+                //format other data types for insert statement
                 else
                 {
                     values.Add(property.GetValue(obj).ToString());
@@ -156,6 +185,9 @@ namespace Lab_5
             var reader = command.ExecuteNonQuery();
         }
 
+        /*
+         * Updates a record by taking a parametered object and taking the values of its properties.
+         */
         public void Update<T> (T obj)
         {
             //Get objects property names
@@ -165,14 +197,17 @@ namespace Lab_5
             List<string> values = new List<string>();
             foreach (PropertyInfo property in properties)
             {
+                //format DateTime for DB
                 if (property.PropertyType == typeof(DateTime))
                 {
                     values.Add("\"" + ((DateTime)property.GetValue(obj)).Year + "-" + ((DateTime)property.GetValue(obj)).Month + "-" + ((DateTime)property.GetValue(obj)).Day + "\"");
                 }
+                //format string for DB
                 else if (property.PropertyType == typeof(string))
                 {
                     values.Add("\"" + property.GetValue(obj).ToString() + "\"");
                 }
+                //format other data types for insert statement
                 else
                 {
                     values.Add(property.GetValue(obj).ToString());
@@ -199,6 +234,11 @@ namespace Lab_5
             var reader = command.ExecuteNonQuery();
         }
 
+        /*
+         * Delete command to delete the parametered object from the database.
+         * It is assumed that the first property of an object will be its PK,
+         * so that first property will be used on deletion.
+         */
         public void Delete<T> (T obj)
         {
             //Get objects property names
@@ -217,6 +257,9 @@ namespace Lab_5
             var reader = command.ExecuteNonQuery();
         }
 
+        /*
+         * To close resources commited to reading the Sqlite DB file
+         */
         public void Dispose()
         {
             connection.Close();

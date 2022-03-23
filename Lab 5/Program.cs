@@ -4,7 +4,7 @@
  * Project Name: Lab 5
  * ==========================================================================================
  * Creator's Name and Email: Chris Seals, sealscm@etsu.edu
- * Date Created: Mar-21-2022
+ * Date Created: Mar-23-2022
  * Course: CSCI-2910-001
  * ==========================================================================================
  */
@@ -23,16 +23,20 @@ namespace Lab_5
     {
         static void Main(string[] args)
         {
+            //Get path of DB
             string path = FileRoot.GetDefaultDirectory();
             string fullPath = path + $"{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Library.db";
 
             QueryBuilder qb = new QueryBuilder(fullPath);
 
+            //Single read command example
             Author me = qb.Read<Author>(1);
-            Console.WriteLine("Single Read command\n" + me + "\n");
+            Console.WriteLine("Single Read command\n" + me + "\n\n");
 
+
+
+            //Read all command example
             List<Author> Authors = qb.ReadAll<Author>();
-
             Console.WriteLine("Read All command");
             foreach (var item in Authors)
             {
@@ -40,6 +44,9 @@ namespace Lab_5
             }
             Console.WriteLine("\n");
 
+
+
+            //Create command example
             Author newA = new Author();
             newA.Id = 4;
             newA.FirstName = "John";
@@ -55,6 +62,9 @@ namespace Lab_5
             }
             Console.WriteLine("\n");
 
+
+
+            //Update command example
             newA.Surname = "Larry";
             qb.Update<Author>(newA);
 
@@ -67,6 +77,9 @@ namespace Lab_5
             }
             Console.WriteLine("\n");
 
+
+
+            //Delete command example
             qb.Delete<Author>(newA);
 
             Authors = qb.ReadAll<Author>();
@@ -78,6 +91,9 @@ namespace Lab_5
             }
             Console.WriteLine("\n");
 
+
+
+            //Dispose of resources for QueryBuilder object
             qb.Dispose();
         }
     }
