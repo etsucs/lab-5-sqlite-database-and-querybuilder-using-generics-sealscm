@@ -23,5 +23,10 @@ namespace Lab_5.Models
         public string Title { get; set; }
         public string Isbn { get; set; }
         public DateTime DateOfPublication { get; set; }
+
+        public override string ToString()
+        {
+            return Id + ", " + Title + ", " + Isbn + ", " + DateOfPublication;
+        }
     }
 }

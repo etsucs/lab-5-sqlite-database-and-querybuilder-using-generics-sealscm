@@ -22,5 +22,10 @@ namespace Lab_5.Models
         public int Id { get; set; }
         public int BookId { get; set; }
         public int CategoryId { get; set; }
+
+        public override string ToString()
+        {
+            return Id + ", " + BookId + ", " + CategoryId;
+        }
     }
 }

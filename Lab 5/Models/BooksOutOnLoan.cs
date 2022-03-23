@@ -25,5 +25,10 @@ namespace Lab_5.Models
         public DateTime DateIssued { get; set; }
         public DateTime DueDate { get; set; }
         public DateTime DateReturned { get; set; }
+
+        public override string ToString()
+        {
+            return Id + ", " + BookId + ", " + UserId + ", " + DateIssued + ", " + DueDate + ", " + DateReturned;
+        }
     }
 }

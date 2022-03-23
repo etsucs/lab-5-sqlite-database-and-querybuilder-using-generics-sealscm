@@ -26,5 +26,10 @@ namespace Lab_5.Models
         public double AmountOfFine { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
+
+        public override string ToString()
+        {
+            return Id + ", " + UserName + ", " + UserAddress + ", " + OtherUserDetails + ", " + AmountOfFine + ", " + Email + ", " + PhoneNumber;
+        }
     }
 }

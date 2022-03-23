@@ -23,14 +23,62 @@ namespace Lab_5
     {
         static void Main(string[] args)
         {
-            PropertyInfo[] property = typeof(Author).GetProperties();
+            string path = FileRoot.GetDefaultDirectory();
+            string fullPath = path + $"{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Library.db";
 
-            foreach (PropertyInfo propertyInfo in property)
+            QueryBuilder qb = new QueryBuilder(fullPath);
+
+            Author me = qb.Read<Author>(1);
+            Console.WriteLine("Single Read command\n" + me + "\n");
+
+            List<Author> Authors = qb.ReadAll<Author>();
+
+            Console.WriteLine("Read All command");
+            foreach (var item in Authors)
             {
-                Console.WriteLine(propertyInfo.Name);
+                Console.WriteLine(item);
             }
+            Console.WriteLine("\n");
 
+            Author newA = new Author();
+            newA.Id = 4;
+            newA.FirstName = "John";
+            newA.Surname = "Belemy";
+            
+            qb.Create<Author>(newA);
 
+            Authors = qb.ReadAll<Author>();
+            Console.WriteLine("Create command:");
+            foreach (var item in Authors)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("\n");
+
+            newA.Surname = "Larry";
+            qb.Update<Author>(newA);
+
+            Authors = qb.ReadAll<Author>();
+
+            Console.WriteLine("Update command:");
+            foreach (var item in Authors)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("\n");
+
+            qb.Delete<Author>(newA);
+
+            Authors = qb.ReadAll<Author>();
+
+            Console.WriteLine("Delete command:");
+            foreach (var item in Authors)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("\n");
+
+            qb.Dispose();
         }
     }
 }

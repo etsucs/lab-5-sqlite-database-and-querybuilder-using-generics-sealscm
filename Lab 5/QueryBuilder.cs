@@ -25,7 +25,7 @@ namespace Lab_5
 
         public QueryBuilder (string locationOfDatabase)
         {
-            connection = new SqliteConnection (locationOfDatabase);
+            connection = new SqliteConnection ("Data Source=" + locationOfDatabase);
             connection.Open();
         }
 
@@ -43,10 +43,27 @@ namespace Lab_5
             {
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    typeof(T).GetProperty(reader.GetName(i)).SetValue(data, reader.GetValue(i));
+                    if (typeof(T).GetProperty(reader.GetName(i)).PropertyType == typeof(int))
+                    {
+                        typeof(T).GetProperty(reader.GetName(i)).SetValue(data, Convert.ToInt32(reader.GetValue(i)));
+                    }
+                    else if (typeof(T).GetProperty(reader.GetName(i)).PropertyType == typeof(DateTime) && reader.GetValue(i).ToString().Split('-').Length == 3)
+                    {
+                        string[] date = reader.GetValue(i).ToString().Split('-');
+                        int[] dateNum = new int[3];
+                        for (int l = 0; l < 3; l++)
+                        {
+                            dateNum[l] = Convert.ToInt32(date[l]);
+                        }
+                        var dateTime = new DateTime(dateNum[0], dateNum[1], dateNum[2]);
+                        typeof(T).GetProperty(reader.GetName(i)).SetValue(data, dateTime);
+                    }
+                    else
+                    {
+                        typeof(T).GetProperty(reader.GetName(i)).SetValue(data, reader.GetValue(i));
+                    }
                 }
             }
-
             return data;
         }
         
@@ -68,12 +85,29 @@ namespace Lab_5
 
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    typeof(T).GetProperty(reader.GetName(i)).SetValue(data, reader.GetValue(i));
+                    if (typeof(T).GetProperty(reader.GetName(i)).PropertyType == typeof(int))
+                    {
+                        typeof(T).GetProperty(reader.GetName(i)).SetValue(data, Convert.ToInt32(reader.GetValue(i)));
+                    }
+                    else if (typeof(T).GetProperty(reader.GetName(i)).PropertyType == typeof(DateTime) && reader.GetValue(i).ToString().Split('-').Length == 3)
+                    {
+                        string[] date = reader.GetValue(i).ToString().Split('-');
+                        int[] dateNum = new int[3];
+                        for (int l = 0; l < 3; l++)
+                        {
+                            dateNum[l] = Convert.ToInt32(date[l]);
+                        }
+                        var dateTime = new DateTime(dateNum[0], dateNum[1], dateNum[2]);
+                        typeof(T).GetProperty(reader.GetName(i)).SetValue(data, dateTime);
+                    }
+                    else
+                    {
+                        typeof(T).GetProperty(reader.GetName(i)).SetValue(data, reader.GetValue(i));
+                    }
                 }
 
                 datas.Add(data);
             }
-
             return datas;
         }
 
@@ -86,11 +120,23 @@ namespace Lab_5
             List<string> values = new List<string>();
             foreach (PropertyInfo property in properties)
             {
-                values.Add(property.GetValue(obj).ToString());
+                if (property.PropertyType == typeof(DateTime))
+                {
+                    values.Add("\"" + ((DateTime)property.GetValue(obj)).Year + "-" + ((DateTime)property.GetValue(obj)).Month + "-" + ((DateTime)property.GetValue(obj)).Day + "\"");
+                }
+                else if (property.PropertyType == typeof(string))
+                {
+                    values.Add("\"" + property.GetValue(obj).ToString() + "\"");
+                }
+                else
+                {
+                    values.Add(property.GetValue(obj).ToString());
+                }
             }
 
             //Formatting string to make it correct for sql statement
             StringBuilder sb = new StringBuilder();
+            string val = "";
             for (int i = 0; i < values.Count; i++)
             {
                 if(i == values.Count - 1)
@@ -112,16 +158,68 @@ namespace Lab_5
 
         public void Update<T> (T obj)
         {
+            //Get objects property names
+            PropertyInfo[] properties = typeof(T).GetProperties();
 
+            //Get values from properties
+            List<string> values = new List<string>();
+            foreach (PropertyInfo property in properties)
+            {
+                if (property.PropertyType == typeof(DateTime))
+                {
+                    values.Add("\"" + ((DateTime)property.GetValue(obj)).Year + "-" + ((DateTime)property.GetValue(obj)).Month + "-" + ((DateTime)property.GetValue(obj)).Day + "\"");
+                }
+                else if (property.PropertyType == typeof(string))
+                {
+                    values.Add("\"" + property.GetValue(obj).ToString() + "\"");
+                }
+                else
+                {
+                    values.Add(property.GetValue(obj).ToString());
+                }
+            }
+
+            //Formatting string to make it correct for sql statement
+            StringBuilder sb = new StringBuilder();
+            for (int i = 1; i < values.Count; i++)
+            {
+                if (i == values.Count - 1)
+                {
+                    sb.Append($"{properties[i].Name} = {values[i]}");
+                }
+                else
+                {
+                    sb.Append($"{properties[i].Name} = {values[i]}, ");
+                }
+            }
+
+            var command = connection.CreateCommand();
+
+            command.CommandText = $"update {typeof(T).Name} set {sb} where {properties[0].Name} = {values[0]}";
+            var reader = command.ExecuteNonQuery();
         }
 
         public void Delete<T> (T obj)
         {
+            //Get objects property names
+            PropertyInfo[] properties = typeof(T).GetProperties();
 
+            //Get values from properties
+            List<string> values = new List<string>();
+            foreach (PropertyInfo property in properties)
+            {
+                values.Add(property.GetValue(obj).ToString());
+            }
+
+            var command = connection.CreateCommand();
+
+            command.CommandText = $"delete from {typeof(T).Name} where {properties[0].Name} = {values[0]}";
+            var reader = command.ExecuteNonQuery();
         }
 
         public void Dispose()
         {
+            connection.Close();
             connection.Dispose();
         }
     }

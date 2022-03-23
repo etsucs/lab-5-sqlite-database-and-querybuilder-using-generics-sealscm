@@ -22,5 +22,10 @@ namespace Lab_5.Models
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string Surname { get; set; }
+
+        public override string ToString()
+        {
+            return Id + ", " + FirstName + ", " + Surname;
+        }
     }
 }
