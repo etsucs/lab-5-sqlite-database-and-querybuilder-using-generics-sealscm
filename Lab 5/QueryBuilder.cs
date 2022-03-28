@@ -16,6 +16,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
+using Lab_5.Models;
 
 namespace Lab_5
 {
@@ -144,8 +145,11 @@ namespace Lab_5
 
             //Get values from properties
             List<string> values = new List<string>();
-            foreach (PropertyInfo property in properties)
+            List<string> names = new List<string>();
+            PropertyInfo property;
+            for (int i = 1; i < properties.Length; i++)
             {
+                property = properties[i];
                 //format DateTime for DB
                 if (property.PropertyType == typeof(DateTime))
                 {
@@ -161,35 +165,40 @@ namespace Lab_5
                 {
                     values.Add(property.GetValue(obj).ToString());
                 }
+                names.Add(property.Name);
             }
 
             //Formatting string to make it correct for sql statement
             StringBuilder sb = new StringBuilder();
-            string val = "";
+            StringBuilder sbNames = new StringBuilder();
             for (int i = 0; i < values.Count; i++)
             {
                 if(i == values.Count - 1)
                 {
                     sb.Append($"{values[i]}");
+                    sbNames.Append(names[i]);
                 }
                 else
                 {
                     sb.Append($"{values[i]}, ");
+                    sbNames.Append($"{names[i]}, ");
                 }
+                
             }
 
             var command = connection.CreateCommand();
 
-            command.CommandText = $"insert into {typeof(T).Name} values ({sb})";
+            command.CommandText = $"insert into {typeof(T).Name} ({sbNames}) values ({sb})";
 
             var reader = command.ExecuteNonQuery();
         }
 
         /*
          * Updates a record by taking a parametered object and taking the values of its properties.
-         * Note: It is assumed that the first property is the PK of the object.
+         * Note: It is assumed that the object will inherit the IClassModel interface, so
+         * the Id field will be referenced as such.
          */
-        public void Update<T> (T obj)
+        public void Update<T> (T obj) where T : IClassModel
         {
             //Get objects property names
             PropertyInfo[] properties = typeof(T).GetProperties();
@@ -231,30 +240,20 @@ namespace Lab_5
 
             var command = connection.CreateCommand();
 
-            command.CommandText = $"update {typeof(T).Name} set {sb} where {properties[0].Name} = {values[0]}";
+            command.CommandText = $"update {typeof(T).Name} set {sb} where Id = {obj.Id}";
             var reader = command.ExecuteNonQuery();
         }
 
         /*
          * Delete command to delete the parametered object from the database.
-         * Note: It is assumed that the first property of an object will be its PK,
-         * so that first property will be used on deletion.
+         * Note: The object used has to inherit the IClassModel interface
+         * to use the Id property correctly.
          */
-        public void Delete<T> (T obj)
+        public void Delete<T> (T obj) where T : IClassModel
         {
-            //Get objects property names
-            PropertyInfo[] properties = typeof(T).GetProperties();
-
-            //Get values from properties
-            List<string> values = new List<string>();
-            foreach (PropertyInfo property in properties)
-            {
-                values.Add(property.GetValue(obj).ToString());
-            }
-
             var command = connection.CreateCommand();
 
-            command.CommandText = $"delete from {typeof(T).Name} where {properties[0].Name} = {values[0]}";
+            command.CommandText = $"delete from {typeof(T).Name} where Id = {obj.Id}";
             var reader = command.ExecuteNonQuery();
         }
 
