@@ -26,8 +26,9 @@ namespace Lab_5
             //Get path of DB
             string path = FileRoot.GetDefaultDirectory();
             string fullPath = path + $"{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Library.db";
+            QueryBuilder qb = new QueryBuilder(fullPath);
 
-            using (QueryBuilder qb = new QueryBuilder(fullPath))
+            using (qb)
             {
                 //Single read command example
                 Author author = qb.Read<Author>(1);

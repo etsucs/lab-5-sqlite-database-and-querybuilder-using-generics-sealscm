@@ -145,8 +145,11 @@ namespace Lab_5
 
             //Get values from properties
             List<string> values = new List<string>();
-            foreach (PropertyInfo property in properties)
+            List<string> names = new List<string>();
+            PropertyInfo property;
+            for (int i = 1; i < properties.Length; i++)
             {
+                property = properties[i];
                 //format DateTime for DB
                 if (property.PropertyType == typeof(DateTime))
                 {
@@ -162,26 +165,30 @@ namespace Lab_5
                 {
                     values.Add(property.GetValue(obj).ToString());
                 }
+                names.Add(property.Name);
             }
 
             //Formatting string to make it correct for sql statement
             StringBuilder sb = new StringBuilder();
-            string val = "";
+            StringBuilder sbNames = new StringBuilder();
             for (int i = 0; i < values.Count; i++)
             {
                 if(i == values.Count - 1)
                 {
                     sb.Append($"{values[i]}");
+                    sbNames.Append(names[i]);
                 }
                 else
                 {
                     sb.Append($"{values[i]}, ");
+                    sbNames.Append($"{names[i]}, ");
                 }
+                
             }
 
             var command = connection.CreateCommand();
 
-            command.CommandText = $"insert into {typeof(T).Name} values ({sb})";
+            command.CommandText = $"insert into {typeof(T).Name} ({sbNames}) values ({sb})";
 
             var reader = command.ExecuteNonQuery();
         }
